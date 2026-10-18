@@ -12,6 +12,8 @@ import GoToTop from './components/GoToTop';
 import QuoteModal from './components/QuoteModal';
 import { IoCheckmarkCircle } from 'react-icons/io5';
 
+import { scrollToTarget } from './components/SmoothScroll';
+
 export default function Home() {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState('Web Development');
@@ -46,10 +48,7 @@ export default function Home() {
 
       <main>
         <article>
-          <Hero onLearnMore={() => {
-            const el = document.getElementById('about');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }} />
+          <Hero onLearnMore={() => scrollToTarget('#about', -70)} />
 
           <About />
 

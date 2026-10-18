@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { IoArrowUpOutline } from 'react-icons/io5';
+import { scrollToTarget } from './SmoothScroll';
 
 export default function GoToTop() {
   const [isVisible, setIsVisible] = useState(false);
@@ -21,10 +22,7 @@ export default function GoToTop() {
 
   const scrollToTop = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    scrollToTarget(0);
   };
 
   return (

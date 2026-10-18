@@ -138,7 +138,6 @@ address {
 html {
   font-family: var(--ff-poppins);
   font-size: 10px;
-  scroll-behavior: smooth;
 }
 
 body {
@@ -146,6 +145,28 @@ body {
   color: var(--purple-navy);
   font-size: 1.6rem;
   overflow-x: hidden;
+}
+
+/* Lenis smooth scrolling rules */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 ::-webkit-scrollbar {
@@ -194,7 +215,12 @@ body {
 
 .btn:is(:hover, :focus) {
   background-position: right;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px hsla(335, 87%, 51%, 0.35);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .w-100 {
@@ -202,15 +228,19 @@ body {
 }
 
 .banner-animation {
-  animation: waveAnim 2s linear infinite alternate;
+  animation: floatLevitate 4s ease-in-out infinite alternate;
+  will-change: transform;
 }
 
-@keyframes waveAnim {
+@keyframes floatLevitate {
   0% {
-    transform: translate(0, 0) rotate(0);
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(0.8deg);
   }
   100% {
-    transform: translate(2px, 2px) rotate(1deg);
+    transform: translateY(0px) rotate(0deg);
   }
 }
 

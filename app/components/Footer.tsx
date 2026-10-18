@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   IoLogoFacebook,
@@ -7,15 +10,102 @@ import {
   IoMail,
   IoLocation,
 } from 'react-icons/io5';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const footerRef = useRef<HTMLElement>(null);
+  const brandRef = useRef<HTMLDivElement>(null);
+  const socialRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Brand column fade in from left
+      if (brandRef.current) {
+        gsap.fromTo(
+          brandRef.current,
+          { opacity: 0, x: -40 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.9,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: footerRef.current,
+              start: 'top 85%',
+              once: true,
+            },
+          }
+        );
+      }
+
+      // Social icons staggered pop-in
+      if (socialRef.current) {
+        gsap.fromTo(
+          socialRef.current.children,
+          { opacity: 0, scale: 0 },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: 'back.out(2)',
+            scrollTrigger: {
+              trigger: footerRef.current,
+              start: 'top 85%',
+              once: true,
+            },
+          }
+        );
+      }
+
+      // Footer lists staggered fade up
+      gsap.fromTo(
+        '.footer-list',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.12,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: '.footer-top',
+            start: 'top 85%',
+            once: true,
+          },
+        }
+      );
+
+      // Copyright fade in
+      gsap.fromTo(
+        '.footer-bottom',
+        { opacity: 0, y: 15 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: '.footer-bottom',
+            start: 'top 95%',
+            once: true,
+          },
+        }
+      );
+    }, footerRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <footer className="footer" id="contact">
+    <footer className="footer" id="contact" ref={footerRef}>
       <div className="footer-top section">
         <div className="container">
-          <div className="footer-brand">
+          <div className="footer-brand" ref={brandRef}>
             <Link href="#top" className="logo">
               Desinic
             </Link>
@@ -25,7 +115,7 @@ export default function Footer() {
               malesuada ut feugiat eget, cursus eget felis.
             </p>
 
-            <ul className="social-list">
+            <ul className="social-list" ref={socialRef}>
               <li>
                 <a
                   href="https://facebook.com"

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { IoCloseOutline, IoMenuOutline, IoChevronForwardOutline } from 'react-icons/io5';
+import { gsap } from 'gsap';
 
 interface HeaderProps {
   onOpenQuote: () => void;
@@ -11,8 +12,18 @@ interface HeaderProps {
 export default function Header({ onOpenQuote }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isHeaderActive, setIsHeaderActive] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    // Entrance slide down animation
+    if (headerRef.current) {
+      gsap.fromTo(
+        headerRef.current,
+        { y: -60, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out' }
+      );
+    }
+
     const handleScroll = () => {
       if (window.scrollY >= 400) {
         setIsHeaderActive(true);
@@ -34,7 +45,11 @@ export default function Header({ onOpenQuote }: HeaderProps) {
   };
 
   return (
-    <header className={`header ${isHeaderActive ? 'active' : ''}`} data-header>
+    <header
+      ref={headerRef}
+      className={`header ${isHeaderActive ? 'active' : ''}`}
+      data-header
+    >
       <div className="container">
         {/* Overlay backdrop for mobile nav */}
         <div

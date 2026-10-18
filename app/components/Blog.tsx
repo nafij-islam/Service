@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { IoTimeOutline, IoChatbubbleOutline, IoShareSocialOutline } from 'react-icons/io5';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 interface BlogProps {
   onNotify?: (msg: string) => void;
@@ -50,8 +52,63 @@ const initialBlogData = [
 
 export default function Blog({ onNotify }: BlogProps) {
   const [blogs, setBlogs] = useState(initialBlogData);
+  const sectionRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
-  const handleComment = (id: number) => {
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Section title fade-in
+      gsap.fromTo(
+        '.blog .section-title',
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 82%',
+            once: true,
+          },
+        }
+      );
+
+      // Staggered blog cards cascade
+      if (listRef.current) {
+        gsap.fromTo(
+          listRef.current.children,
+          { opacity: 0, y: 50, scale: 0.96 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.85,
+            stagger: 0.18,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: listRef.current,
+              start: 'top 85%',
+              once: true,
+            },
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const handleComment = (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    // Micro bounce animation on clicked button
+    gsap.fromTo(
+      e.currentTarget,
+      { scale: 1.35 },
+      { scale: 1, duration: 0.4, ease: 'back.out(2)' }
+    );
+
     setBlogs((prev) =>
       prev.map((b) => (b.id === id ? { ...b, comments: b.comments + 1 } : b))
     );
@@ -60,7 +117,13 @@ export default function Blog({ onNotify }: BlogProps) {
     }
   };
 
-  const handleShare = async (title: string) => {
+  const handleShare = async (title: string, e: React.MouseEvent<HTMLButtonElement>) => {
+    gsap.fromTo(
+      e.currentTarget,
+      { rotate: 45, scale: 1.25 },
+      { rotate: 0, scale: 1, duration: 0.4, ease: 'back.out(2)' }
+    );
+
     if (typeof window !== 'undefined') {
       try {
         if (navigator.clipboard) {
@@ -80,11 +143,11 @@ export default function Blog({ onNotify }: BlogProps) {
   };
 
   return (
-    <section className="section blog" id="blog">
+    <section className="section blog" id="blog" ref={sectionRef}>
       <div className="container">
         <h2 className="h2 section-title underline">Our Blog & News</h2>
 
-        <ul className="blog-list">
+        <ul className="blog-list" ref={listRef}>
           {blogs.map((post) => (
             <li key={post.id}>
               <div className="blog-card">
@@ -118,7 +181,7 @@ export default function Blog({ onNotify }: BlogProps) {
                       type="button"
                       className="comment"
                       aria-label="Add comment"
-                      onClick={() => handleComment(post.id)}
+                      onClick={(e) => handleComment(post.id, e)}
                     >
                       <IoChatbubbleOutline aria-hidden="true" />
                       <data value={post.comments}>{post.comments}</data>
@@ -128,7 +191,7 @@ export default function Blog({ onNotify }: BlogProps) {
                       type="button"
                       className="share"
                       aria-label="Share article"
-                      onClick={() => handleShare(post.title)}
+                      onClick={(e) => handleShare(post.title, e)}
                     >
                       <IoShareSocialOutline aria-hidden="true" />
                     </button>

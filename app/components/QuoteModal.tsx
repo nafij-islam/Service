@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { IoCloseOutline, IoCheckmarkCircle } from 'react-icons/io5';
+import { gsap } from 'gsap';
 
 interface QuoteModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export default function QuoteModal({
     message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const modalContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (initialService) {
@@ -30,7 +32,31 @@ export default function QuoteModal({
     }
   }, [initialService]);
 
+  useEffect(() => {
+    if (isOpen && modalContentRef.current) {
+      gsap.fromTo(
+        modalContentRef.current,
+        { opacity: 0, scale: 0.88, y: 25 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'back.out(1.4)' }
+      );
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    if (modalContentRef.current) {
+      gsap.to(modalContentRef.current, {
+        opacity: 0,
+        scale: 0.9,
+        duration: 0.2,
+        ease: 'power2.in',
+        onComplete: onClose,
+      });
+    } else {
+      onClose();
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,16 +71,20 @@ export default function QuoteModal({
         service: 'Web Development',
         message: '',
       });
-      onClose();
+      handleClose();
     }, 600);
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop" onClick={handleClose} role="dialog" aria-modal="true">
+      <div
+        className="modal-content"
+        ref={modalContentRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           className="modal-close-btn"
-          onClick={onClose}
+          onClick={handleClose}
           aria-label="Close quote modal"
           type="button"
         >

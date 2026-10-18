@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   IoTelescopeOutline,
   IoDesktopOutline,
@@ -9,6 +9,8 @@ import {
   IoCloseOutline,
   IoCheckmarkCircleOutline,
 } from 'react-icons/io5';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 interface ServicesProps {
   onSelectService?: (serviceName: string) => void;
@@ -55,13 +57,80 @@ const servicesData = [
 
 export default function Services({ onSelectService }: ServicesProps) {
   const [activeModalService, setActiveModalService] = useState<typeof servicesData[0] | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const modalContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Title fade in
+      gsap.fromTo(
+        '.service .section-title',
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 82%',
+            once: true,
+          },
+        }
+      );
+
+      // Staggered service cards fade in and rise
+      gsap.fromTo(
+        '.service-card',
+        { opacity: 0, y: 60, scale: 0.94 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.85,
+          stagger: 0.2,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.service-list',
+            start: 'top 85%',
+            once: true,
+          },
+        }
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // Animate modal appearance with GSAP spring
+  useEffect(() => {
+    if (activeModalService && modalContentRef.current) {
+      gsap.fromTo(
+        modalContentRef.current,
+        { opacity: 0, scale: 0.88, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'back.out(1.4)' }
+      );
+    }
+  }, [activeModalService]);
 
   const handleCardBtnClick = (service: typeof servicesData[0]) => {
     setActiveModalService(service);
   };
 
   const closeModal = () => {
-    setActiveModalService(null);
+    if (modalContentRef.current) {
+      gsap.to(modalContentRef.current, {
+        opacity: 0,
+        scale: 0.9,
+        duration: 0.2,
+        ease: 'power2.in',
+        onComplete: () => setActiveModalService(null),
+      });
+    } else {
+      setActiveModalService(null);
+    }
   };
 
   const handleQuoteClick = (serviceName: string) => {
@@ -72,7 +141,7 @@ export default function Services({ onSelectService }: ServicesProps) {
   };
 
   return (
-    <section className="section service" id="services">
+    <section className="section service" id="services" ref={sectionRef}>
       <div className="container">
         <h2 className="h2 section-title underline">Our Speciallization</h2>
 
@@ -108,7 +177,11 @@ export default function Services({ onSelectService }: ServicesProps) {
       {/* Service Details Modal */}
       {activeModalService && (
         <div className="modal-backdrop" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content"
+            ref={modalContentRef}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               className="modal-close-btn"
               onClick={closeModal}
