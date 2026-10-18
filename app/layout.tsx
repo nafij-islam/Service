@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   keywords: ['UI Design', 'Web Development', 'Digital Agency', 'Desinic', 'Product Design'],
   authors: [{ name: 'Desinic Team' }],
   icons: {
-    icon: '/favicon.svg',
+    icon: '/favicon.ico',
   },
   openGraph: {
     title: 'Desinic - Get Best UI Design',
